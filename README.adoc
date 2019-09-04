@@ -1,0 +1,101 @@
+= OpenShift 4 Advanced Application Deployment ILT Homework Grading
+
+This repository contains the scripts that students can use to validate that their homework assignment will pass.
+
+The automatic grading process requires a private student repository at https://homework-gitea.apps.shared.na.openshift.opentlc.com.
+
+== Student Repository Structure
+
+A skeleton student repository is provided at https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_template.
+
+See the homework assignment lab on instructions what to implement. Also see the README files in the skeleton repo (and it's three service subdirectories) on how to build and deploy the applications.
+
+== Grading process
+
+As part of the grading the student's scripts are being executed by a pipeline. If the entire pipeline finishes successfully the homework assignment is graded as *passed*. If the pipeline fails the homework assignmend is graded as *failed*.
+
+Students can verify that the homework assignment will pass by running the pipeline themselves before submitting the assignment.
+
+== How to set up the Jenkins to run the test
+
+. Make sure you are logged in as a `cluster-admin` user (e.g. `system:admin`).
+. Create a Jenkins Project (e.g. `gpte-jenkins`) in your cluster.
++
+[source,bash]
+----
+oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
+----
+
+. Deploy a persistent Jenkins (the parameters in JENKINS_OPTS define that Jenkins should start Agent Pods immediately every time a build is started rather than waiting for another build to finish).
++
+[source,bash]
+----
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=4Gi --param VOLUME_CAPACITY=10Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=300" -n gpte-jenkins
+oc set resources dc/jenkins --limits=memory=4Gi,cpu=4 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
+----
++
+. Create a custom Cluster-Role and grant it to the `jenkins` service account to annotate projects. Also allow the `jenkins` service account to create projects.
++
+[source,bash]
+----
+oc create clusterrole namespace-patcher --verb=patch --resource=namespaces
+oc adm policy add-cluster-role-to-user namespace-patcher system:serviceaccount:gpte-jenkins:jenkins
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
+----
+
+. Somehow Jenkins seems to lose the context for the embedded oc command after a few days. Restarting the Jenkins Pod fixes this problem. Therefore set up a Cronjob to restart Jenkins every day at 23:00. For this to work the default service account needs edit permissions for the project it is in.
++
+[source,bash]
+----
+oc policy add-role-to-user edit system:serviceaccount:gpte-jenkins:default -n gpte-jenkins
+oc run restartjenkins --schedule="0 23 * * *" --restart=OnFailure -n gpte-jenkins --image=registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.9 -- /bin/sh -c "oc scale dc jenkins --replicas=0 && sleep 20 && oc scale dc jenkins --replicas=1"
+----
+
+. Once Jenkins is up and running log into Jenkins.
+. In Jenkins create a new Item of type `Pipeline`.
+. Use the following settings in the Item:
+.. This build is parametrized
+.. Create six parameters:
++
+|====
+|*GUID*|String|GUID to prefix all projects
+|*USER*|String|OpenTLC User ID (e.g. wkulhane-redhat.com) to grant admin access for created projects and set the project requester field.
+|*REPO*|String|Full URL to the public Homework Repo (either Gogs or Github)
+|*CLUSTER*|String|Cluster base URL. E.g. na39.openshift.opentlc.com
+|*SETUP*|Boolean|Default: true, If *true* will create all necessary projects. If *false* assumes that projects are already there and only pipelines need to be executed.
+|*DELETE*|Boolean|Default: true, If *true* will delete all created projects after a successful run.
+|====
++
+. Use `https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
+
+. If this is a shared Jenkins (e.g. on the NA311 GPTE Cluster) allow students to start builds:
+.. Log into Jenkins
+.. Navigate to *Manage Jenkins* -> *Configure Global Security*
+.. Leave *Matrix based security* and check the checkboxes under *Job* to allow *authenticated users* to *Build* and *Cancel* builds.
+.. Click *Save*.
+. Create the custom agent image that will be used to run the pipeline:
++
+[source,sh]
+----
+oc new-build  -D $'FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11\n
+      USER root\nRUN yum -y install skopeo && yum clean all\n
+      USER 1001' --name=jenkins-agent-appdev
+----
+
+Now you are ready to try the pipeline. Run the pipeline and provide the appropriate parameters for your environment.
+
+The pipeline will:
+
+* Check out your source code repository
+* Call your shell scripts to
+** Create projects
+** Setup Jenkins
+** Setup the Development Project
+** Setup the Production Project
+* Execute the pipeline for your application for the initial (green) deployment.
+* Check that the application returns the correct application name
+* Execute the pipeline again to execute the blue deployment
+* Again check that the application returns the correct application name
+* Delete the projects
+
+If the pipeline completes successfully you have passed the homework assignment.

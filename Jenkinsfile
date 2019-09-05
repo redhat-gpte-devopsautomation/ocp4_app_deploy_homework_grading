@@ -50,24 +50,21 @@ pipeline {
   stages {
     stage('Get Student Homework Repo') {
       steps {
-        echo "*******************************************************\n" +
-             "*** Advanced OpenShift Development Homework Grading ***\n" +
-             "*** GUID:         ${GUID}\n" +
-             "*** USER:         ${USER}\n" +
-             "*** Student Repo: ${REPO}\n" +
-             "*** CLUSTER:      ${CLUSTER}\n" +
-             "*** SETUP:        ${SETUP}\n" +
-             "*** DELETE:       ${DELETE}\n" +
-             "*** SUBMIT_GRADE: ${SUBMIT_GRADE}\n" +
-             "*******************************************************"
+        echo "*******************************************************************\n" +
+             "*** OpenShift Advanced Application Deployment Homework Grading ***\n" +
+             "*** GUID:          ${GUID}\n" +
+             "*** USER:          ${USER}\n" +
+             "*** Student Repo:  ${REPO}\n" +
+             "*** CLUSTER:       ${CLUSTER}\n" +
+             "*** SETUP:         ${SETUP}\n" +
+             "*** DELETE:        ${DELETE}\n" +
+             "*** SUBMIT_GRADE:  ${SUBMIT_GRADE}\n" +
+             "*******************************************************************\n"
 
         echo "Cloning Student Project Repository"
-        withCredentials(usernamePassword(credentialsId: GIT_CREDS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME') {
-          sh("""
-            git config --global credential.username ${USER}
-            git config --global credential.helper "!echo password=${GITEA_PASSWORD}; echo"
-            git clone 'https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
-          """)
+        shell "git config --global credential.username ${USER}"
+        shell "git config --global credential.helper \"!echo password=${GITEA_PASSWORD}; echo\" "
+        shell "git clone https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}"
       //  git 'https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
         }
         script {

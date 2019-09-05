@@ -74,9 +74,9 @@ pipeline {
       steps {
         echo "Creating Projects"
         sh "./bin/setup_projects.sh ${GUID} ${USER} true"
-      }
-      script {
-        error("*** Stop pipeline here.")
+        script {
+          error("*** Stop pipeline here.")
+        }
       }
     }
     stage("Setup Infrastructure") {

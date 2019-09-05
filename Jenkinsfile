@@ -64,12 +64,13 @@ pipeline {
         echo "Cloning Student Project Repository"
 
         withCredentials(usernamePassword(credentialsId: GIT_CREDS, passwordVariable: "${GITEA_PASSWORD}", usernameVariable: "${USER}"){
-        sh("""
-          git config --global credential.username {GIT_USERNAME}
-          git config --global credential.helper "!echo password={GITPASSWORD}; echo"
-          git clone 'https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
-        """)
+          sh("""
+            git config --global credential.username {GIT_USERNAME}
+            git config --global credential.helper "!echo password={GITPASSWORD}; echo"
+            git clone 'https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
+          """)
 //        git 'https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
+        }
         error("*** Stop pipeline here.")
       }
     }

@@ -1,0 +1,4 @@
+- name: Inject and configure FTL on bastion as grader host
+  hosts: localhost
+  roles:
+    - ftl-injector

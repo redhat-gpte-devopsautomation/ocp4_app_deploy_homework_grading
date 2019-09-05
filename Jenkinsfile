@@ -62,9 +62,9 @@ pipeline {
              "*******************************************************************\n"
 
         echo "Cloning Student Project Repository"
-        shell "git config --global credential.username ${USER}"
-        shell "git config --global credential.helper \"!echo password=${GITEA_PASSWORD}; echo\" "
-        shell "git clone https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}"
+        sh "git config --global credential.username ${USER}"
+        sh "git config --global credential.helper \"!echo password=${GITEA_PASSWORD}; echo\" "
+        sh "git clone https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}"
       }
     }
     stage("Create Projects") {

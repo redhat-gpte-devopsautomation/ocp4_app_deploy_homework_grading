@@ -39,7 +39,7 @@ pipeline {
       inheritFrom "maven"
       containerTemplate {
         name "jnlp"
-        image "docker-registry.default.svc:5000/gpte-jenkins/jenkins-agent-appdev:latest"
+        image "image-registry.openshift-image-registry.svc:5000/gpte-jenkins/jenkins-agent-homework:latest"
         resourceRequestMemory "1Gi"
         resourceLimitMemory "2Gi"
         resourceRequestCpu "1"
@@ -54,14 +54,16 @@ pipeline {
              "*** Advanced OpenShift Development Homework Grading ***\n" +
              "*** GUID:         ${GUID}\n" +
              "*** USER:         ${USER}\n" +
-             "*** Student Repo: *********\n" +
+             "*** Student Repo: ${REPO}\n" +
              "*** CLUSTER:      ${CLUSTER}\n" +
              "*** SETUP:        ${SETUP}\n" +
              "*** DELETE:       ${DELETE}\n" +
+             "*** SUBMIT_GRADE: ${SUBMIT_GRADE}\n" +
              "*******************************************************"
 
         echo "Cloning Student Project Repository"
-        git '${REPO}'
+        git 'https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
+        error("*** Stop pipeline here.")
       }
     }
     stage("Create Projects") {

@@ -8,7 +8,7 @@ The automatic grading process requires a private student repository at https://h
 
 A skeleton student repository is provided at https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_template.
 
-See the homework assignment lab on instructions what to implement. Also see the README files in the skeleton repo (and it's three service subdirectories) on how to build and deploy the applications.
+See the homework assignment lab on instructions what to implement. Also see the README files in the skeleton repo on how to build and deploy the applications.
 
 == Grading process
 
@@ -77,9 +77,7 @@ oc run restartjenkins --schedule="0 23 * * *" --restart=OnFailure -n gpte-jenkin
 +
 [source,sh]
 ----
-oc new-build  -D $'FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11\n
-      USER root\nRUN yum -y install skopeo && yum clean all\n
-      USER 1001' --name=jenkins-agent-appdev
+oc new-build https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading.git --strategy=docker --name=jenkins-agent-homework
 ----
 
 Now you are ready to try the pipeline. Run the pipeline and provide the appropriate parameters for your environment.

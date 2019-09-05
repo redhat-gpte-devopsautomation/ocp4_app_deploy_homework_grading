@@ -9,9 +9,8 @@ RUN curl https://copr.fedorainfracloud.org/coprs/alsadi/dumb-init/repo/epel-7/al
    && curl https://raw.githubusercontent.com/cloudrouter/centos-repo/master/CentOS-Base.repo -o /etc/yum.repos.d/CentOS-Base.repo \
    && curl http://mirror.centos.org/centos-7/7/os/x86_64/RPM-GPG-KEY-CentOS-7 -o /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 
-RUN yum $DISABLES -y install https://centos7.iuscommunity.org/ius-release.rpm \
-    && python36u python36u-pip skopeo git \
-    &&  /usr/bin/pip3.6 install pip --upgrade \
+RUN yum $DISABLES -y install https://centos7.iuscommunity.org/ius-release.rpm python36u python36u-pip skopeo git \
+    && /usr/bin/pip3.6 install pip --upgrade \
     && pip install ansible openshift virtualenv \
     && yum clean all
 

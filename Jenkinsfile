@@ -66,7 +66,6 @@ pipeline {
         shell "git config --global credential.helper \"!echo password=${GITEA_PASSWORD}; echo\" "
         shell "git clone https://homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}"
       //  git 'https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
-        }
         script {
           error("*** Stop pipeline here.")
         }

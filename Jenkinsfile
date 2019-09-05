@@ -70,7 +70,9 @@ pipeline {
           """)
       //  git 'https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}'
         }
-        error("*** Stop pipeline here.")
+        script {
+          error("*** Stop pipeline here.")
+        }
       }
     }
     stage("Create Projects") {

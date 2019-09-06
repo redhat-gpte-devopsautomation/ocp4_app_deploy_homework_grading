@@ -31,6 +31,10 @@
 // * Use https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading as the Git Repo
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
+def STUDENT_USER=""
+def STUDENT_PASSWORD=""
+def GITEA_HOST="homework-gitea.apps.shared.na.openshift.opentlc.com"
+
 pipeline {
   agent {
     kubernetes {
@@ -52,19 +56,23 @@ pipeline {
       steps {
         echo "*******************************************************************\n" +
              "*** OpenShift Advanced Application Deployment Homework Grading ***\n" +
-             "*** GUID:          ${GUID}\n" +
-             "*** USER:          ${USER}\n" +
-             "*** Student Repo:  ${REPO}\n" +
-             "*** CLUSTER:       ${CLUSTER}\n" +
-             "*** SETUP:         ${SETUP}\n" +
-             "*** DELETE:        ${DELETE}\n" +
-             "*** SUBMIT_GRADE:  ${SUBMIT_GRADE}\n" +
+             "*** GUID:            ${GUID}\n" +
+             "*** CREDENTIAL_NAME: ${CREDENTIAL_NAME}\n" +
+             "*** Student Repo:    ${REPO}\n" +
+             "*** CLUSTER:         ${CLUSTER}\n" +
+             "*** SETUP:           ${SETUP}\n" +
+             "*** DELETE:          ${DELETE}\n" +
+             "*** SUBMIT_GRADE:    ${SUBMIT_GRADE}\n" +
              "*******************************************************************\n"
 
         echo "Cloning Student Project Repository"
-        // sh "git config --global credential.username ${USER}"
-        // sh "git config --global credential.helper \"!echo password=${GITEA_PASSWORD}; echo\" "
-        sh "git clone https://${USER}:${GITEA_PASSWORD}@homework-gitea.apps.shared.na.openshift.opentlc.com/${REPO}"
+        withCredentials([usernamePassword(credentialsId: "${CREDENTIAL_NAME}", passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
+          script {
+            STUDENT_USER="${USER}"
+            STUDENT_PASSWORD="${PASSWORD}"
+          }
+        }
+        git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
       }
     }
     stage("Create Projects") {
@@ -73,10 +81,7 @@ pipeline {
       }
       steps {
         echo "Creating Projects"
-        sh "./bin/setup_projects.sh ${GUID} ${USER} true"
-        script {
-          error("*** Stop pipeline here.")
-        }
+        sh "./bin/setup_projects.sh ${GUID} ${STUDENT_USER} true"
       }
     }
     stage("Setup Infrastructure") {
@@ -88,7 +93,7 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
+            sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER} ${STUDENT_USER} ${STUDENT_PASSWORD}"
           }
         }
         stage("Setup Development Project") {
@@ -116,6 +121,9 @@ pipeline {
     }
     stage("First Pipeline Run (from Green to Blue)") {
       steps {
+        script {
+          error("*** Stop pipeline here.")
+        }
         echo "Executing Initial Tasks Pipeline - BLUE deployment"
         script {
           openshift.withCluster() {

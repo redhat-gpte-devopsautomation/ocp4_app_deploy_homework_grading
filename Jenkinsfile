@@ -96,7 +96,7 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER} ${STUDENT_USER} ${STUDENT_PASSWORD}"
+            sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
             script {
               error("*** Stop pipeline here.")
             }

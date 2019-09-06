@@ -97,23 +97,20 @@ pipeline {
           steps {
             echo "Setting up Jenkins"
             sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
-            script {
-              error("*** Stop pipeline here.")
-            }
           }
         }
-        // stage("Setup Development Project") {
-        //   steps {
-        //     echo "Setting up Development Project"
-        //     sh "./bin/setup_dev.sh ${GUID}"
-        //   }
-        // }
-        // stage("Setup Production Project") {
-        //   steps {
-        //     echo "Setting up Production Project"
-        //     sh "./bin/setup_prod.sh ${GUID}"
-        //   }
-        // }
+        stage("Setup Development Project") {
+          steps {
+            echo "Setting up Development Project"
+            sh "./bin/setup_dev.sh ${GUID}"
+          }
+        }
+        stage("Setup Production Project") {
+          steps {
+            echo "Setting up Production Project"
+            sh "./bin/setup_prod.sh ${GUID}"
+          }
+        }
       }
     }
     stage("Reset Projects") {
@@ -201,6 +198,15 @@ pipeline {
       steps {
         echo "Cleanup - deleting all projects for GUID=${GUID}"
         sh "./bin/cleanup.sh ${GUID}"
+      }
+    }
+    stage('FTL') {
+      when {
+        environment name: 'SUBMIT_GRADE', value: 'true'
+      }
+      steps {
+        echo "Running FTL grade_lab"
+        // sh "./bin/cleanup.sh ${GUID}"
       }
     }
   }

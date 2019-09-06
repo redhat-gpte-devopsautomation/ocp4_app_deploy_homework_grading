@@ -14,21 +14,24 @@
 // * Add self-provisioner role to the service account jenkins
 //   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
 //
-// * Create an Item of type Pipeline (Use name "HomeworkGrading")
+// * Create an Item of type Pipeline (Use name "OpenShift 4 Advanced Application Deployment Homework Grading")
 // * Create Five Parameters:
-//   - GUID (type String):    GUID to prefix all projects
-//   - USER (type String):    OpenTLC User ID to receive admin permissions on created projects
-//   - REPO (type String):    full URL to the public Homework Repo
-//                            (either Gogs or Github)
-//   - CLUSTER (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
-//   - SETUP (type Boolean):  Default: true
-//                            If true will create all necessary projects.
-//                            If false assumes that projects are already there and only pipelines need
-//                            to be executed.
-//   - DELETE (type Boolean): Default: true
-//                            If true will delete all created projects
-//                            after a successful run.
-// * Use https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading as the Git Repo
+//   - GUID (type String):            GUID to prefix all projects - use Homework Environment GUID
+//   - CREDENTIAL_NAME (type String): Name of Jenkins Credential that contains the USER and PASSWORD for Gitea.
+//                                    Should be the same as OpenTLC User Name
+//   - REPO (type String):            Name of the private repository (do not include the hostname and user of Gitea)
+//   - CLUSTER (type String):         Cluster base URL. E.g. shared.na.openshift.opentlc.com
+//   - SETUP (type Boolean):          Default: true
+//                                    If true will create all necessary projects.
+//                                    If false assumes that projects are already there and only pipelines need
+//                                    to be executed.
+//   - DELETE (type Boolean):         Default: true
+//                                    If true will delete all created projects
+//                                    after a successful run.
+//   - SUBMIT_GRADE (type Boolean):   Default: false
+//                                    If true will submit the result via FTL into the LMS
+//                                    Currently not implemented
+// * Use https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading as the Git Repo
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
 def STUDENT_USER=""
@@ -58,7 +61,7 @@ pipeline {
              "*** OpenShift Advanced Application Deployment Homework Grading ***\n" +
              "*** GUID:            ${GUID}\n" +
              "*** CREDENTIAL_NAME: ${CREDENTIAL_NAME}\n" +
-             "*** Student Repo:    ${REPO}\n" +
+             "*** REPO:            ${REPO}\n" +
              "*** CLUSTER:         ${CLUSTER}\n" +
              "*** SETUP:           ${SETUP}\n" +
              "*** DELETE:          ${DELETE}\n" +
@@ -94,20 +97,23 @@ pipeline {
           steps {
             echo "Setting up Jenkins"
             sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER} ${STUDENT_USER} ${STUDENT_PASSWORD}"
+            script {
+              error("*** Stop pipeline here.")
+            }
           }
         }
-        stage("Setup Development Project") {
-          steps {
-            echo "Setting up Development Project"
-            sh "./bin/setup_dev.sh ${GUID}"
-          }
-        }
-        stage("Setup Production Project") {
-          steps {
-            echo "Setting up Production Project"
-            sh "./bin/setup_prod.sh ${GUID}"
-          }
-        }
+        // stage("Setup Development Project") {
+        //   steps {
+        //     echo "Setting up Development Project"
+        //     sh "./bin/setup_dev.sh ${GUID}"
+        //   }
+        // }
+        // stage("Setup Production Project") {
+        //   steps {
+        //     echo "Setting up Production Project"
+        //     sh "./bin/setup_prod.sh ${GUID}"
+        //   }
+        // }
       }
     }
     stage("Reset Projects") {
@@ -121,9 +127,6 @@ pipeline {
     }
     stage("First Pipeline Run (from Green to Blue)") {
       steps {
-        script {
-          error("*** Stop pipeline here.")
-        }
         echo "Executing Initial Tasks Pipeline - BLUE deployment"
         script {
           openshift.withCluster() {

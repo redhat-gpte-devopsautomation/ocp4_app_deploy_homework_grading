@@ -15,12 +15,12 @@
 //   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
 //
 // * Create an Item of type Pipeline (Use name "OpenShift 4 Advanced Application Deployment Homework Grading")
-// * Create Five Parameters:
+// * Create seven Parameters:
 //   - GUID (type String):            GUID to prefix all projects - use Homework Environment GUID
 //   - CREDENTIAL_NAME (type String): Name of Jenkins Credential that contains the USER and PASSWORD for Gitea.
 //                                    Should be the same as OpenTLC User Name
 //   - REPO (type String):            Name of the private repository (do not include the hostname and user of Gitea)
-//   - CLUSTER (type String):         Cluster base URL. E.g. shared.na.openshift.opentlc.com
+//   - CLUSTER (type String):         Grading Cluster base URL. E.g. shared.na.openshift.opentlc.com
 //   - SETUP (type Boolean):          Default: true
 //                                    If true will create all necessary projects.
 //                                    If false assumes that projects are already there and only pipelines need

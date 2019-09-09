@@ -30,8 +30,8 @@ oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
 +
 [source,bash]
 ----
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=4Gi --param VOLUME_CAPACITY=10Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=300" -n gpte-jenkins
-oc set resources dc/jenkins --limits=memory=4Gi,cpu=4 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
+oc new-app jenkins-persistent --param JENKINS_SERVICE_NAME=homework-jenkins --param JNLP_SERVICE_NAME=homework-jenkins-jnlp --param ENABLE_OAUTH=true --param MEMORY_LIMIT=4Gi --param VOLUME_CAPACITY=10Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=300" -n gpte-jenkins
+oc set resources dc/homework-jenkins --limits=memory=4Gi,cpu=4 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
 ----
 +
 . Create a custom Cluster-Role and grant it to the `jenkins` service account to annotate projects. Also allow the `jenkins` service account to create projects.
@@ -39,8 +39,9 @@ oc set resources dc/jenkins --limits=memory=4Gi,cpu=4 --requests=memory=2Gi,cpu=
 [source,bash]
 ----
 oc create clusterrole namespace-patcher --verb=patch --resource=namespaces
-oc adm policy add-cluster-role-to-user namespace-patcher system:serviceaccount:gpte-jenkins:jenkins
-oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
+
+oc adm policy add-cluster-role-to-user namespace-patcher -z homework-jenkins -n gpte-jenkins
+oc adm policy add-cluster-role-to-user self-provisioner -z homework-jenkins -n gpte-jenkins
 ----
 
 // . Somehow Jenkins seems to lose the context for the embedded oc command after a few days. Restarting the Jenkins Pod fixes this problem. Therefore set up a Cronjob to restart Jenkins every day at 23:00. For this to work the default service account needs edit permissions for the project it is in.
@@ -54,14 +55,14 @@ oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gp
 . Once Jenkins is up and running log into Jenkins.
 . In Jenkins create a new Item of type *Pipeline*.
 . Use the following settings in the Item:
-.. Name: OpenShift 4 Advanced Application Deployment Homework Grading
+.. Name: Grade Advanced Application Deployment Homework
 .. Check the checkbox next to "This build is parametrized"
 .. Create seven parameters:
 +
 [options="header"]
 |====
 |Parameter|Type|Description
-|*GUID*|String|GUID to prefix all projects. Use the GUID 
+|*GUID*|String|GUID to prefix all projects. Use the GUID provided to you when you requested your homework environment.
 |*CREDENTIAL_NAME*|String|Name of the credential in Jenkins holding the student's OpenTLC/Gitea User ID and Gitea Password  (e.g. wkulhane-redhat.com). The User ID is also used to grant admin access for created projects and set the project requester field.
 |*REPO*|String|Name of the private repository (do not include the hostname and user of Gitea)
 |*CLUSTER*|String|Grading Cluster base URL. E.g. shared.na.openshift.opentlc.com
@@ -70,12 +71,13 @@ oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gp
 |*SUBMIT_GRADE*|Boolean|Default: false, If *true* will submit the result of the pipeline run to the LMS.
 |====
 +
-. Use `https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
+. Use `https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
 
-. If this is a shared Jenkins (e.g. on the NA311 GPTE Cluster) allow students to start builds:
+. If this is a shared Jenkins (e.g. on the NA GPTE Cluster) allow students to start builds:
 .. Log into Jenkins
 .. Navigate to *Manage Jenkins* -> *Configure Global Security*
 .. Leave *Matrix based security* and check the checkboxes under *Job* to allow *authenticated users* to *Build* and *Cancel* builds.
+.. Also check the checkboxes under *Credentials* to allow *authenticated users* to *Create* credentials.
 .. Click *Save*.
 . Create the custom agent image that will be used to run the pipeline:
 +

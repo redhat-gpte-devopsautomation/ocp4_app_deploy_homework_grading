@@ -77,6 +77,12 @@ pipeline {
         }
         git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
         sh "chmod +x ./bin/*.sh"
+
+        // Patch Manifests to include correct GUID for image
+        sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-is-dev.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-dev.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-blue.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-green.yaml"
       }
     }
     stage("Create Projects") {

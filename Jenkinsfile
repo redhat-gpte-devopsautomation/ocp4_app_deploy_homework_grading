@@ -69,13 +69,17 @@ pipeline {
              "*******************************************************************\n"
 
         echo "Cloning Student Project Repository"
+        // Retrieve userid and password from provided credentials
         withCredentials([usernamePassword(credentialsId: "${CREDENTIAL_NAME}", passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
           script {
             STUDENT_USER="${USER}"
             STUDENT_PASSWORD="${PASSWORD}"
           }
         }
+        // Check out repository
         git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
+
+        // Ensure all shell scripts are executable (workaround for Windows users)
         sh "chmod +x ./bin/*.sh"
 
         // Patch Manifests to include correct GUID for image

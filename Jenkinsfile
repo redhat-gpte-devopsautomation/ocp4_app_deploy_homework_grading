@@ -84,6 +84,7 @@ pipeline {
 
         // Patch Manifests to include correct GUID for image
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-is-dev.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-bc-dev.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-dev.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-blue.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-green.yaml"

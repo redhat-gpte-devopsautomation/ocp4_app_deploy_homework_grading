@@ -76,6 +76,7 @@ pipeline {
           }
         }
         git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
+        sh "chmod +x ./bin/*.sh"
       }
     }
     stage("Create Projects") {

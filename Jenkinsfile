@@ -203,6 +203,15 @@ pipeline {
         }
       }
     }
+    stage('FTL') {
+      when {
+        environment name: 'SUBMIT_GRADE', value: 'true'
+      }
+      steps {
+        echo "Running FTL grade_lab"
+        // sh "/usr/local/bin/grade_lab ocp4_app_deploy_homework 08_01 ${GUID}"
+      }
+    }
     stage('Cleanup') {
       when {
         environment name: 'DELETE', value: 'true'
@@ -210,15 +219,6 @@ pipeline {
       steps {
         echo "Cleanup - deleting all projects for GUID=${GUID}"
         sh "./bin/cleanup.sh ${GUID}"
-      }
-    }
-    stage('FTL') {
-      when {
-        environment name: 'SUBMIT_GRADE', value: 'true'
-      }
-      steps {
-        echo "Running FTL grade_lab"
-        // sh "./bin/cleanup.sh ${GUID}"
       }
     }
   }

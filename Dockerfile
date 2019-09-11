@@ -22,9 +22,5 @@ RUN ansible-galaxy install -r /tmp/requirements.yml \
     && ansible-playbook --connection=local -i localhost, /tmp/install_ftl.yml -e install_dependencies=false \
     && rm /tmp/install_ftl.yml /tmp/requirements.yml
 
-# Temporarily make all of FTL read/writeable to fix root stuff
-RUN  chmod -R g+rw /opt/ftl-repo-clone \
-  && chmod -R o+rw /opt/ftl-repo-clone
-
 # Switch back to user 1001 to execute the agent pod
 USER 1001

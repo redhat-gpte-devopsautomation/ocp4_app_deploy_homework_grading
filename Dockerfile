@@ -1,5 +1,6 @@
-FROM quay.io/openshift/origin-jenkins-agent-maven:4.1.0
+# FROM quay.io/openshift/origin-jenkins-agent-maven:4.1.0
 
+FROM image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-maven:latest
 # Switch to root user to install things
 USER root
 

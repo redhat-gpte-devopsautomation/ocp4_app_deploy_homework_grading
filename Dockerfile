@@ -22,5 +22,9 @@ RUN ansible-galaxy install -r /tmp/requirements.yml \
     && ansible-playbook --connection=local -i localhost, /tmp/install_ftl.yml -e install_dependencies=false \
     && rm /tmp/install_ftl.yml /tmp/requirements.yml
 
+# Enable setting of opentlc_student in global vars file
+RUN chown 1001 /opt/ftl-repo-clone/vars/global_vars.yml \
+    && chmod 666 /opt/ftl-repo-clone/vars/global_vars.yml
+
 # Switch back to user 1001 to execute the agent pod
 USER 1001

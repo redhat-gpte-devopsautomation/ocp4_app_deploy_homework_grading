@@ -42,6 +42,9 @@ oc create clusterrole namespace-patcher --verb=patch --resource=namespaces
 
 oc adm policy add-cluster-role-to-user namespace-patcher -z homework-jenkins -n gpte-jenkins
 oc adm policy add-cluster-role-to-user self-provisioner -z homework-jenkins -n gpte-jenkins
+
+# Cluster-Reader is necessary for FTL
+oc adm policy add-cluster-role-to-user cluster-reader -z homework-jenkins -n gpte-jenkins
 ----
 
 . Once Jenkins is up and running log into Jenkins.

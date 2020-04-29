@@ -209,13 +209,14 @@ pipeline {
       }
       steps {
         echo "Running FTL grade_lab for student ${CREDENTIAL_NAME} and GUID ${GUID}"
+        echo "NOT IMPLEMENTED YET."
         
         // Set up FTL variables in the agent pod
-        sh "echo opentlc_student: ${CREDENTIAL_NAME} >> /opt/ftl-repo-clone/vars/global_vars.yml"
-        sh "echo guid: ${GUID} >> /opt/ftl-repo-clone/vars/global_vars.yml"
+        // sh "echo opentlc_student: ${CREDENTIAL_NAME} >> /opt/ftl-repo-clone/vars/global_vars.yml"
+        // sh "echo guid: ${GUID} >> /opt/ftl-repo-clone/vars/global_vars.yml"
 
         // Run FTL
-        sh "/usr/local/bin/grade_lab ocp4_advanced_application_deployment homework"
+        // sh "/usr/local/bin/grade_lab ocp4_advanced_application_deployment homework"
       }
     }
     stage('Cleanup') {

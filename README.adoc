@@ -1,8 +1,8 @@
-= OpenShift 4 Advanced Application Deployment ILT Homework Grading
+= OpenShift 4.4 Advanced Application Deployment ILT Homework Grading
 
 This repository contains the scripts that students can use to validate that their homework assignment will pass.
 
-The automatic grading process requires a private student repository at https://homework-gitea.apps.shared.na.openshift.opentlc.com.
+The automatic grading process requires a private student repository at https://homework-gitea.apps.shared.na4.openshift.opentlc.com.
 
 == Student Repository Structure
 
@@ -38,13 +38,27 @@ oc set resources dc/homework-jenkins --limits=memory=4Gi,cpu=4 --requests=memory
 +
 [source,bash]
 ----
-oc create clusterrole namespace-patcher --verb=patch --resource=namespaces
+oc create clusterrole gpte-namespace-patcher --verb=patch --resource=namespaces
 
-oc adm policy add-cluster-role-to-user namespace-patcher -z homework-jenkins -n gpte-jenkins
+oc adm policy add-cluster-role-to-user gpte-namespace-patcher -z homework-jenkins -n gpte-jenkins
 oc adm policy add-cluster-role-to-user self-provisioner -z homework-jenkins -n gpte-jenkins
 
 # Cluster-Reader is necessary for FTL
 oc adm policy add-cluster-role-to-user cluster-reader -z homework-jenkins -n gpte-jenkins
+----
+
+. Ensure that a group `GPTE-APP-DEPLOY-HOMEWORK` exists on the cluster.
++
+[source,sh]
+----
+oc adm groups new GPTE-APP-DEPLOY-HOMEWORK
+----
+
+. Ensure that the GPTE-APP-DEPLOY-HOMEWORK group has view permission to the `gpte-jenkins` project. When requesting cluster access to create homework the student's user will be added to this group.
++
+[source,sh]
+----
+oc policy add-role-to-group view GPTE-APP-DEPLOY-HOMEWORK -n gpte-jenkins
 ----
 
 . Once Jenkins is up and running log into Jenkins.

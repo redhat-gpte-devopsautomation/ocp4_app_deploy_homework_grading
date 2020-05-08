@@ -36,7 +36,7 @@
 
 def STUDENT_USER=""
 def STUDENT_PASSWORD=""
-def GITEA_HOST="homework-gitea.apps.shared.na.openshift.opentlc.com"
+def GITEA_HOST="homework-gitea.gpte-hw-cicd.svc.cluster.local:3000"
 
 pipeline {
   agent {

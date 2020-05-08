@@ -107,7 +107,7 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
+            sh "./bin/setup_jenkins.sh ${GUID} http://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {

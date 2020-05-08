@@ -76,7 +76,7 @@ pipeline {
           }
         }
         // Check out repository
-        git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
+        git credentialsId: "${STUDENT_USER}", url: "http://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
 
         // Ensure all shell scripts are executable (workaround for Windows users)
         sh "chmod +x ./bin/*.sh"

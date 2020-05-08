@@ -10,7 +10,7 @@ RUN curl https://copr.fedorainfracloud.org/coprs/alsadi/dumb-init/repo/epel-7/al
    && curl http://mirror.centos.org/centos-7/7/os/x86_64/RPM-GPG-KEY-CentOS-7 -o /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 
 RUN yum ${DISABLES} -y install https://centos7.iuscommunity.org/ius-release.rpm \
-    && yum ${DISABLES} -y install python37u python37u-pip skopeo git \
+    && yum ${DISABLES} -y install python36u python36u-pip skopeo git \
     && /usr/bin/pip3.6 install pip setuptools --upgrade \
     && pip install wheel ansible openshift virtualenv \
     && yum clean all

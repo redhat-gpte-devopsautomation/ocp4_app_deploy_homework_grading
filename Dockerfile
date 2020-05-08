@@ -13,7 +13,7 @@ RUN yum ${DISABLES} -y install https://centos7.iuscommunity.org/ius-release.rpm 
     && yum ${DISABLES} -y install skopeo git \
     && yum clean all
 
-# Next for FTL (doesn't work though
+# Next for FTL (doesn't work though with OCP 4.4 images. Disabling for now)
 # RUN yum ${DISABLES} -y install https://centos7.iuscommunity.org/ius-release.rpm \
 #     && yum ${DISABLES} -y install python36u python36u-pip skopeo git \
 #     && /usr/bin/pip3.6 install pip setuptools --upgrade \

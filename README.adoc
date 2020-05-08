@@ -16,7 +16,7 @@ As part of the grading the student's scripts are being executed by a pipeline. I
 
 Students can verify that the homework assignment will pass by running the pipeline themselves before submitting the assignment.
 
-== How to set up the Jenkins to run the test
+== How to set up the Homework Jenkins
 
 . Make sure you are logged in as a `cluster-admin` user (e.g. `system:admin`).
 . Create a Jenkins Project (e.g. `gpte-jenkins`) in your cluster.
@@ -112,3 +112,186 @@ The pipeline will:
 * Delete the projects
 
 If the pipeline completes successfully you have passed the homework assignment.
+
+== How to set up the GPTE Operators (Gitea, Sonarqube)
+
+. The Nexus Operator should already be running in the `opentlc-shared` project.
+. Make sure you are logged in as a `cluster-admin` user (e.g. `system:admin`).
+. Create a GPTE Operators Project in your cluster.
++
+[source,bash]
+----
+oc new-project gpte-operators --description "GPTE Operators"
+----
+
+. Deploy the Gitea Operator
++
+[source,sh]
+----
+oc apply -f https://raw.githubusercontent.com/wkulhanek/gitea-operator/v0.17.0/deploy/crds/gpte.opentlc.com_giteas_crd.yaml
+oc apply -f https://raw.githubusercontent.com/wkulhanek/gitea-operator/v0.17.0/deploy/cluster_role.yaml
+oc create sa gitea-operator -n gpte-operators
+oc adm policy add-cluster-role-to-user gitea-operator system:serviceaccount:gpte-operators:gitea-operator
+oc apply -f https://raw.githubusercontent.com/wkulhanek/gitea-operator/v0.17.0/deploy/operator.yaml -n gpte-operators
+----
+
+. Deploy the Sonarqube Operator
++
+[source,sh]
+----
+oc apply -f https://raw.githubusercontent.com/wkulhanek/sonarqube-operator/v0.17.0/deploy/crds/gpte.opentlc.com_sonarqubes_crd.yaml
+oc apply -f https://raw.githubusercontent.com/wkulhanek/sonarqube-operator/v0.17.0/deploy/cluster_role.yaml
+oc create sa sonarqube-operator -n gpte-operators
+oc adm policy add-cluster-role-to-user sonarqube-operator system:serviceaccount:gpte-operators:sonarqube-operator
+oc apply -f https://raw.githubusercontent.com/wkulhanek/sonarqube-operator/v0.17.0/deploy/operator.yaml -n gpte-operators
+----
+
+== How to set up the Homework Gitea, Sonarqube and Nexus
+
+. Make sure you are logged in as a `cluster-admin` user (e.g. `system:admin`).
+. Create a Homework CICD Project (e.g. `gpte-hw-cicd`) in your cluster.
++
+[source,bash]
+----
+oc new-project gpte-hw-cicd --description "GPTE Homework CICD Tools"
+----
+
+. Make a directory to keep the CRs
++
+[source,sh]
+----
+mkdir $HOME/gpte-homework
+----
+
+=== Set up Gitea
+
+. Create the Homework Gitea Custom Resource:
++
+[source,sh]
+----
+cat << EOF > $HOME/gpte-homework/homework-gitea.yaml
+apiVersion: gpte.opentlc.com/v1alpha1
+kind: Gitea
+metadata:
+  name: homework-gitea
+spec:
+  giteaImageTag: 1.11.4
+  giteaRoute: homework-gitea.apps.shared-na4.na4.openshift.opentlc.com
+  giteaSsl: true
+  giteaVolumeSize: 20Gi
+  postgresqlVolumeSize: 20Gi
+EOF
+----
+
+. Deploy the Homework Gitea:
++
+[source,sh]
+----
+oc apply -f $HOME/gpte-homework/homework-gitea.yaml -n gpte-hw-cicd
+----
+
+. Log into the Homework Gitea at https://homework-gitea.apps.shared-na4.na4.openshift.opentlc.com
+. Register an account (this first account will be a site adminstrator)
+
+=== Setup Sonarqube
+
+. Create the Homework Sonarqube Custom Resource:
++
+[source,sh]
+----
+cat << EOF > $HOME/gpte-homework/homework-sonarqube.yaml
+apiVersion: gpte.opentlc.com/v1alpha1
+kind: Sonarqube
+metadata:
+  name: homework-sonarqube
+spec:
+  postgresqlVolumeSize: 10Gi
+  sonarqubeVolumeSize: 10Gi
+  sonarqubeSsl: True
+  sonarqubeRoute: homework-sonarqube.apps.shared-na4.na4.openshift.opentlc.com
+EOF
+----
+
+. Deploy the Homework Sonarqube:
++
+[source,sh]
+----
+oc apply -f $HOME/gpte-homework/homework-sonarqube.yaml -n gpte-hw-cicd
+----
+
+. Log into the Homework Sonarqube at https://homework-sonarqube.apps.shared-na4.na4.openshift.opentlc.com
+. User id `admin` with password `admin`
+. Change the password (to the usual)
+
+=== Setup Nexus
+
+. Create the Homework Nexus Custom Resource:
++
+[source,sh]
+----
+cat << EOF > $HOME/gpte-homework/homework-nexus.yaml
+apiVersion: gpte.opentlc.com/v1alpha1
+kind: Nexus
+metadata:
+  name: homework-nexus
+spec:
+  nexusNewAdminPassword: redhat
+  nexusRoute: homework-nexus.apps.shared-na4.na4.openshift.opentlc.com
+  nexusRegistryRoute: homework-nexus-registry.apps.shared-na4.na4.openshift.opentlc.com
+  nexusVolumeSize: 60Gi
+  nexusSsl: True
+  nexusImageTag: latest
+  nexusCpuRequest: 4
+  nexusCpuLimit: 4
+  nexusMemoryRequest: 2Gi
+  nexusMemoryLimit: 2Gi
+EOF
+----
+
+. Deploy the Homework Nexus:
++
+[source,sh]
+----
+oc apply -f $HOME/gpte-homework/homework-nexus.yaml -n gpte-hw-cicd
+----
+
+. Log into the Homework Sonarqube at https://homework-nexus.apps.shared-na4.na4.openshift.opentlc.com
+. User id `admin` with password `redhat`
+. Enable Anonymous access in the wizard
+. Validate that the expected repositories are created (docker, jboss, maven-all-public, maven-central, npm, npm-all, redhat-ga and releases)
+. On the left select Repository -> Cleanup Policies
+. Create a new Cleanup Policy for Container images
+.. Name: `CleanContainerImages`
+.. Format: 'docker'
+.. Published Before: check the checkbox and enter `1`
+.. Click `Create Cleanup Policy`
+. Create a new Cleanup Policy for Maven artifacts
+.. Name: `CleanMaven`
+.. Format: 'maven2'
+.. Published Before: check the checkbox and enter `3`
+.. Click `Create Cleanup Policy`
+. Apply Cleanup Policy for Containers
+.. Navigate back to Repository -> Repositories
+.. Select `docker`
+.. Add Cleanup Policy `CleanContainerImages` to the applied cleanup policies
+.. Click `Save`
+. Apply Cleanup Policy for Releases
+.. Navigate back to Repository -> Repositories
+.. Select `releases`
+.. Add Cleanup Policy `CleanMaven` to the applied cleanup policies
+.. Click `Save`
+. Apply Cleanup Policy for Maven Central Artifacts
+.. Navigate back to Repository -> Repositories
+.. Select `maven-central`
+.. Add Cleanup Policy `CleanMaven` to the applied cleanup policies
+.. Click `Save`
+. Apply Cleanup Policy for Redhat Maven Artifacts
+.. Navigate back to Repository -> Repositories
+.. Select `redhat-ga`
+.. Add Cleanup Policy `CleanMaven` to the applied cleanup policies
+.. Click `Save`
+. Apply Cleanup Policy for Redhat Jboss Artifacts
+.. Navigate back to Repository -> Repositories
+.. Select `jboss`
+.. Add Cleanup Policy `CleanMaven` to the applied cleanup policies
+.. Click `Save`

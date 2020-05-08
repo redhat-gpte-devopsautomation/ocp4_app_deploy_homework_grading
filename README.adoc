@@ -23,7 +23,7 @@ Students can verify that the homework assignment will pass by running the pipeli
 +
 [source,bash]
 ----
-oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
+oc new-project gpte-jenkins --display-name "GPTE Homework Grading Jenkins"
 ----
 
 . Deploy a persistent Jenkins (the parameters in JENKINS_OPTS define that Jenkins should start Agent Pods immediately every time a build is started rather than waiting for another build to finish).
@@ -121,7 +121,7 @@ If the pipeline completes successfully you have passed the homework assignment.
 +
 [source,bash]
 ----
-oc new-project gpte-operators --description "GPTE Operators"
+oc new-project gpte-operators --display-name "GPTE Operators"
 ----
 
 . Deploy the Gitea Operator
@@ -153,10 +153,10 @@ oc apply -f https://raw.githubusercontent.com/wkulhanek/sonarqube-operator/v0.17
 +
 [source,bash]
 ----
-oc new-project gpte-hw-cicd --description "GPTE Homework CICD Tools"
+oc new-project gpte-hw-cicd --display-name "GPTE Homework CI/CD Tools"
 ----
 
-. Make a directory to keep the CRs
+. Make a directory to keep the Custom Resource Definitions.
 +
 [source,sh]
 ----
@@ -255,7 +255,7 @@ EOF
 oc apply -f $HOME/gpte-homework/homework-nexus.yaml -n gpte-hw-cicd
 ----
 
-. Log into the Homework Sonarqube at https://homework-nexus.apps.shared-na4.na4.openshift.opentlc.com
+. Log into the Homework Nexus at https://homework-nexus.apps.shared-na4.na4.openshift.opentlc.com
 . User id `admin` with password `redhat`
 . Enable Anonymous access in the wizard
 . Validate that the expected repositories are created (docker, jboss, maven-all-public, maven-central, npm, npm-all, redhat-ga and releases)

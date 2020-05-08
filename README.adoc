@@ -80,7 +80,7 @@ oc policy add-role-to-group view GPTE-APP-DEPLOY-HOMEWORK -n gpte-jenkins
 |*SUBMIT_GRADE*|Boolean|Default: false, If *true* will submit the result of the pipeline run to the LMS.
 |====
 +
-. Use `https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
+. Use `https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading` as the Git Repo, `*/update_44` as the Branch to build and `Jenkinsfile` as the Jenkinsfile.
 
 . If this is a shared Jenkins (e.g. on the NA GPTE Cluster) allow students to start builds:
 .. Log into Jenkins

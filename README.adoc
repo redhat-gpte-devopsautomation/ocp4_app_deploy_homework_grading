@@ -295,3 +295,12 @@ oc apply -f $HOME/gpte-homework/homework-nexus.yaml -n gpte-hw-cicd
 .. Select `jboss`
 .. Add Cleanup Policy `CleanMaven` to the applied cleanup policies
 .. Click `Save`
+. Update Redeploy Permissions for `releases` and `docker` to allow students to publish artifacts and container images multiple times using the same version
+.. Navigate to Repository -> Repositories
+.. Select `releases`
+.. Change *Hosted / Deployment Policy* to *Allow redeploy*
+.. Click `Save`
+.. Navigate to Repository -> Repositories
+.. Select `docker`
+.. Change *Hosted / Deployment Policy* to *Allow redeploy*
+.. Click `Save`

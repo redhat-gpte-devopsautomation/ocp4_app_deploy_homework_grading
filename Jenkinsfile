@@ -87,6 +87,7 @@ pipeline {
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-dev.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-blue.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-green.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/agent-cm.yaml"
       }
     }
     stage("Create Projects") {

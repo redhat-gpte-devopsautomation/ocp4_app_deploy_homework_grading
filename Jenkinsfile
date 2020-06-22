@@ -34,8 +34,8 @@
 // * Use https://github.com/redhat-gpte-devopsautomation/ocp4_app_deploy_homework_grading as the Git Repo
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
-def STUDENT_USER=""
-def STUDENT_PASSWORD=""
+def STUDENT_USER="anil_sharma-persistent.co.in"
+def STUDENT_PASSWORD="P@sswd@vtx052019"
 def GITEA_HOST="homework-gitea.apps.shared.na.openshift.opentlc.com"
 
 pipeline {

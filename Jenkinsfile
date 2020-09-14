@@ -36,7 +36,7 @@
 
 def STUDENT_USER=""
 def STUDENT_PASSWORD=""
-def GITEA_HOST="homework-gitea.apps.shared.na.openshift.opentlc.com"
+def GITEA_HOST="homework-gitea.gpte-hw-cicd.svc.cluster.local:3000"
 
 pipeline {
   agent {
@@ -65,7 +65,6 @@ pipeline {
              "*** CLUSTER:         ${CLUSTER}\n" +
              "*** SETUP:           ${SETUP}\n" +
              "*** DELETE:          ${DELETE}\n" +
-             "*** SUBMIT_GRADE:    ${SUBMIT_GRADE}\n" +
              "*******************************************************************\n"
 
         echo "Cloning Student Project Repository"
@@ -77,7 +76,7 @@ pipeline {
           }
         }
         // Check out repository
-        git credentialsId: "${STUDENT_USER}", url: "https://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
+        git credentialsId: "${STUDENT_USER}", url: "http://${GITEA_HOST}/${STUDENT_USER}/${REPO}"
 
         // Ensure all shell scripts are executable (workaround for Windows users)
         sh "chmod +x ./bin/*.sh"
@@ -88,6 +87,7 @@ pipeline {
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-dev.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-blue.yaml"
         sh "sed -i 's/GUID/${GUID}/g' manifests/tasks-dc-green.yaml"
+        sh "sed -i 's/GUID/${GUID}/g' manifests/agent-cm.yaml"
       }
     }
     stage("Create Projects") {
@@ -108,7 +108,7 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./bin/setup_jenkins.sh ${GUID} https://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
+            sh "./bin/setup_jenkins.sh ${GUID} http://${GITEA_HOST}/${STUDENT_USER}/${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {
@@ -201,22 +201,6 @@ pipeline {
             error("*** tasks-green returned unexpected name.")
           }
         }
-      }
-    }
-    stage('FTL') {
-      when {
-        environment name: 'SUBMIT_GRADE', value: 'true'
-      }
-      steps {
-        echo "Running FTL grade_lab for student ${CREDENTIAL_NAME} and GUID ${GUID}"
-        echo "NOT IMPLEMENTED YET."
-        
-        // Set up FTL variables in the agent pod
-        // sh "echo opentlc_student: ${CREDENTIAL_NAME} >> /opt/ftl-repo-clone/vars/global_vars.yml"
-        // sh "echo guid: ${GUID} >> /opt/ftl-repo-clone/vars/global_vars.yml"
-
-        // Run FTL
-        // sh "/usr/local/bin/grade_lab ocp4_advanced_application_deployment homework"
       }
     }
     stage('Cleanup') {
